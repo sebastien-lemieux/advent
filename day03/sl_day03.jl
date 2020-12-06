@@ -1,4 +1,4 @@
-include("../common.jl")
+include("../sl_common.jl")
 
 field = readFile("input.txt", s -> collect(Char, s))
 # print(field)

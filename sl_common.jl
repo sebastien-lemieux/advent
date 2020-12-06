@@ -1,6 +1,9 @@
 
 ## Common functions...
 
+between(x, low, high) = x ≥ low && x ≤ high
+int(str) = parse(Int, str)
+
 function readFile(fn, transf = identity)
     allRes = Vector()
     open(fn) do f
