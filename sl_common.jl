@@ -4,7 +4,7 @@
 between(x, low, high) = x ≥ low && x ≤ high
 int(str) = parse(Int, str)
 
-function readFile(fn, transf = identity, resType = Array{Any,1})
+function readFile(transf, fn::String, resType = Array{Any,1})
     allRes = resType()
     open(fn) do f
         while !eof(f)
@@ -13,3 +13,5 @@ function readFile(fn, transf = identity, resType = Array{Any,1})
     end
     return allRes
 end
+
+readFile(fn::String, resType = Array{Any,1}) = readFile(identity, fn, resType)
