@@ -69,7 +69,7 @@ function next_cycle()
     return next_active
 end
 
-active, bbox = initialize("input.txt", 3)
+active, bbox = initialize("input.txt", 3) ## part 1, N=3; part 2, N=4
 
 for i in 1:6
     println("Starting cycle $i with $(length(active)) active cubes...")
