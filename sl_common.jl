@@ -3,6 +3,7 @@
 
 between(x, low, high) = x ≥ low && x ≤ high
 int(str) = parse(Int, str)
+incr(d, x) = d[x] = get(d, x, 0) + 1
 
 function readFile(transf, fn::String, resType = Array{Any,1})
     allRes = resType()
