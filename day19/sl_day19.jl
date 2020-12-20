@@ -12,10 +12,10 @@ function parse_rule(g, term, line)
     p = split.(split(p, " | "), " ")
     i = int(i)
 
-    if p[1][1][1] == '"'
+    if p[1][1][1] == '"' ## Terminals
         tmp = get!(term, i, Vector{Char}())
         push!(tmp, p[1][1][2])
-    else
+    else ## Non-terminals
         for o in p
             _push!(g, i, int.(o))
         end
@@ -36,7 +36,9 @@ function to_chomsky(g, term)
                 else
                     _push!(ng, i, g[o[1]])
                 end
-            else _push!(ng, i, o) end
+            else
+                _push!(ng, i, o)
+            end
         end
     end
     return ng, nt
@@ -60,7 +62,6 @@ end
 
 function test_msg(gi, ti, msg)
     n = length(msg)
-    # println("len = $n")
 
     cyk = [Set{Int}() for i=1:n, j=1:n]
     for i=1:n
@@ -81,7 +82,7 @@ function test_msg(gi, ti, msg)
     return cyk[n,1]
 end
 
-open("input.txt") do f
+g, term = open("input.txt") do f
     g = G()
     term = Dict{Int, Vector{Char}}()
 
@@ -94,28 +95,31 @@ open("input.txt") do f
         line = readline(f)
     end
 
+    ## For Part 2
+    _push!(g, 8, [42, 8])
+    _push!(g, 11, [42, 999])
+    _push!(g, 999, [11, 31])
+
     g, term = to_chomsky(g, term)
     gi, ti = reverse_gt(g, term)
-    # println(term)
 
     line = readline(f)
     while !eof(f)
-        # println("msg: $line")
         tmp = test_msg(gi, ti, line)
-        if !isempty(tmp)
-            # println("msg($(length(line)) = $line")
-            # println("cyk = $tmp")
+        if 0 in tmp
+            println(line)
             count += 1
         end
-        # println()
         line = readline(f)
     end
-    println("count = $count") 
+    tmp = test_msg(gi, ti, line)
+    if 0 in tmp
+        println(line)
+        count += 1
+    end
+    println(stderr, "count = $count")
+    return g, term
 end
 
 # Part 1: 149
-
-
-
-# msg = "abbabbaaaabbbaaababbababbbbbbabbbbaaabbaaababbbb"
-# msg = "aabbb"
+# Part 2: 332
