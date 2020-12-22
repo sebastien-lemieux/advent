@@ -34,3 +34,7 @@ for (ing, alg) in lines
     count += length(setdiff(ing, algv))
 end
 println(count) # Part 1: 2075
+
+## Part 2
+
+println(join([algd[alg] for alg in sort(collect(keys(algd)))], ","))
