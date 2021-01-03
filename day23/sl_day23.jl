@@ -70,20 +70,33 @@ end
 
 decr(c::Cups, x::Int) = (x+(c.max - 2))%c.max+1
 
+function splice!(a::Node, b::Node, c::Node)
+    bn = b.next
+    link!(b, c.next)
+    link!(c, a.next)
+    link!(a, bn)
+end
+
+
+
 function move!(cups)
     current = cups.current
     insert = current + 3
-    id = [(current + i).data for i=1:3]
-    target = current.data
-    while (target = decr(cups, target)) in id
+    nb = 3
+    target = decr(cups, current.data)
+    ptr = current
+    while nb > 0
+        nb -= 1
+        ptr = ptr.next
+        if target == ptr.data
+            target = decr(cups, target)
+            ptr = current
+            nb = 3
+        end
     end
     dest = cups.index[target]
-    tc, ti, td = copy(current), copy(insert), copy(dest)
-    # println("$tc, $ti, $td")
-    link!(current, ti.next)
-    link!(dest, tc.next)    
-    link!(insert, td.next)
-    cups.current = ti.next
+    cups.current = current.next
+    splice!(current, insert, dest)
 end
 
 input = "418976235"
@@ -91,7 +104,7 @@ cups = [x for x=1:1_000_000]
 cups[1:9] = parse.(Int, collect(input))
 cups = Cups(cups)
 
-@time for i = 1:10_000_000 ## 2.5 sec
+@time for i = 1:10_000_000 ## 0.4 sec
     move!(cups)
 end
 
