@@ -1,10 +1,4 @@
-# use every adapter
-# distribution of the differences of joltage between
-# charging outlet, adapters and device
-# device = highest + 3
-# adapters = difference of 1,2,3 lower than the rating
-
-numbers = [int(l.strip()) for l in open('../../day10/input_day10.txt')]
+numbers = [int(l.strip()) for l in open('input.txt')]
 device = max(numbers)+3
 charging = 0
 
@@ -49,7 +43,7 @@ for i in range(1,len(numbers)):
     else: 
         parents_prev = parents_table[numbers[i-1]]
         n2 = len(set(parents_prev)-set(parents))
-        o = 2-n2*0.25
+        o = 2-n2*0.25 # magical number
     res *= o
     
 print('Number task 2', int(res))
@@ -81,3 +75,5 @@ print('Number task 2', int(res))
 #p = find_all_paths(children_table, 0) 
 #res = [v for v in p if v[-1]==device]
 #print(len(res))
+
+
