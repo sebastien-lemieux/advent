@@ -4,6 +4,7 @@
 between(x, low, high) = x ≥ low && x ≤ high
 int(str) = parse(Int, str)
 incr(d, x) = d[x] = get(d, x, 0) + 1
+Base.parse(::Type{UnitRange}, s::AbstractString) = UnitRange(parse.(Int, split(s, "-"))...)
 
 function readFile(transf, fn::String, resType = Array{Any,1})
     allRes = resType()
