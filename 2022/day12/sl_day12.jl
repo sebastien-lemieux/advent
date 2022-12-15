@@ -32,11 +32,13 @@ function visit(pos::CartesianIndex{2}, from::Step)
     return false, 0
 end
 
-start_pos = findfirst(mat .== 'S')
+start_pos = findall(mat .== 'S' .|| mat .== 'a')
 cur = Queue{Step}()
-enqueue!(cur, Step(start_pos, 'a', 0))
 visited = falses(size(mat))
-visited[start_pos] = true
+for x in start_pos
+    enqueue!(cur, Step(x, 'a', 0))
+    visited[x] = true
+end
 
 while !isempty(cur)
     tmp = dequeue!(cur)
@@ -53,4 +55,4 @@ while !isempty(cur)
 end
 
 # Part 1: 449
-
+# Part 2: 443
