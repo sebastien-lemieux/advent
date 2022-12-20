@@ -21,3 +21,18 @@ function readFile(transf, fn::String, resType = Array{Any,1})
 end
 
 readFile(fn::String, resType = Array{Any,1}) = readFile(identity, fn, resType)
+
+struct StrIndex
+    str2id::Dict{String, Int32}
+    id2str::Vector{String}
+
+    StrIndex(vs::Vector{String}) = new(Dict(vs[i] => i for i = 1:length(vs)), vs) # must be uniqued!
+end
+
+## indexing
+Base.getindex(idx::StrIndex, s::String) = idx.str2id[s]
+Base.getindex(idx::StrIndex, i::Integer) = idx.id2str[i]
+Base.getindex(idx::StrIndex, v::AbstractVector{String}) = [idx[s] for s in v]
+Base.getindex(idx::StrIndex, v::AbstractVector{<:Integer}) = [idx[i] for i in v]
+Base.getindex(idx::StrIndex, v::AbstractVector{<:Bool}) = idx.id2str[v]
+Base.length(idx::StrIndex) = length(idx.id2str)
