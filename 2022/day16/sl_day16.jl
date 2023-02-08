@@ -60,24 +60,40 @@ end
 
 g2 = compress_graph(g)
 
-function visit(g, so_far, lava, time)
-    pos = last(so_far)
+function visit(g, so_far_m, so_far_e, lava, time_m, time_e)
+    rand() < 0.00001 && println("$so_far_m  $so_far_e")
+    pos_m = last(so_far_m)
+    pos_e = last(so_far_e)
     best = lava
-    best_path = so_far
+    best_path_m = so_far_m
+    best_path_e = so_far_e
     for i=1:length(g.v)
-        i ∈ so_far && continue
-        new_time = time - g.e[pos, i] - 1
-        new_time < 0 && continue
-        tmp, path = visit(g, [so_far; [i]], lava + new_time * g.reward[i], new_time)
+        (i ∈ so_far_m || i ∈ so_far_e) && continue
+        new_time_m = time_m - g.e[pos_m, i] - 1
+        new_time_m < 0 && continue
+        tmp, path_m, path_e = visit(g, [so_far_m; [i]], so_far_e, lava + new_time_m * g.reward[i], new_time_m, time_e)
         if tmp > best
             best = tmp
-            best_path = path
+            best_path_m = path_m
+            best_path_e = path_e
         end
     end
-    return best, best_path
+    for i=1:length(g.v)
+        (i ∈ so_far_m || i ∈ so_far_e) && continue
+        new_time_e = time_e - g.e[pos_e, i] - 1
+        new_time_e < 0 && continue
+        tmp, path_m, path_e = visit(g, so_far_m, [so_far_e; [i]], lava + new_time_e * g.reward[i], time_m, new_time_e)
+        if tmp > best
+            best = tmp
+            best_path_m = path_m
+            best_path_e = path_e
+        end
+    end
+    return best, best_path_m, best_path_e
 end
 
-visit(g2, [1], 0, 30)
+visit(g2, [1], [1], 0, 26, 26)
 
 
 # Part 1: 1862
+# Part 2: 2422
