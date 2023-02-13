@@ -51,7 +51,7 @@ pos[1, 1, 1] = true
 while !isempty(ext)
     c = pop!(ext)
     println(c)
-    push!(ext, neighbors(c, pos)...)
+    push!(ext, neighbors!(c, pos)...)
 end
 
 cavities = filter(c -> !pos[c...], [Cube((i, j, k)) for i=1:22 for j=1:22 for k=1:22])
