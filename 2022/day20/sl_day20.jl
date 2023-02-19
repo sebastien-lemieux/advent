@@ -40,11 +40,11 @@ function Base.show(io::IO, l::Node{T}) where T
     end
 end
 
-function move(x::Node{Int}) ## deal with neg!
+function move(x::Node{Int}, m) ## deal with neg!
     x.prev.next = x.next
     x.next.prev = x.prev
     cur = x.next
-    for i=1:abs(x.el)
+    for i=1:abs(x.el % m)
         cur = (x.el > 0) ? cur.next : cur.prev
     end
     x.next = cur
@@ -66,9 +66,12 @@ f = readFile("input.txt", Vector{Int}) do line
 end
 
 n = length(f)
+f = f .* 811589153
 a, v = circular(f);
-for i in v
-    move(i)
+for it = 1:10
+    for i in v
+        move(i, n-1)
+    end
 end
 
 while a.el != 0
@@ -83,3 +86,5 @@ for it = 1:3
     sum += a.el
 end
 sum ## Part 1: 2622
+## Part 2: 1538773034088
+
