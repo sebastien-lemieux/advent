@@ -9,7 +9,7 @@ mutable struct Monkey
 end
 
 ops = Dict(
-    '*' => *, '/' => /, '+' => +, '-' => -
+    '*' => *, '/' => ÷, '+' => +, '-' => -
 )
 
 function Monkey(str::String)
@@ -18,28 +18,62 @@ function Monkey(str::String)
 end
 
 monkeys = Dict{String, Monkey}()
-
 readFile("input.txt", Vector{Monkey}) do str
     m = Monkey(str)
     monkeys[m.name] = m
 end
 
-using DataStructures
-solved(m::Monkey) = !isnothing(m.value)
-solve!(m::Monkey) = m.value = m.op(monkeys[m.leftName].value, monkeys[m.rightName].value)
-
-q = Queue{String}()
-for (name, monkey) in monkeys
-    !solved(monkey) && enqueue!(q, monkey.name)
+function solve!(m::Monkey)
+    if isnothing(m.value)
+        a = solve!(monkeys[m.leftName])
+        b = solve!(monkeys[m.rightName])
+        m.value = m.op(a, b)
+    end
+    return m.value
 end
 
-while !isempty(q)
-    m = monkeys[dequeue!(q)]
-    if all(solved.([monkeys[m.leftName], monkeys[m.rightName]]))
-        solve!(m)
-        println(m)
+solve!(monkeys["root"])
+
+## part 2
+
+function pathTo(current, to)
+    m = monkeys[current]
+    current == to && return [m]
+    monkeys[current].op == identity && return nothing
+    a = pathTo(m.leftName, to)
+    b = pathTo(m.rightName, to)
+    if isnothing(a)
+        if isnothing(b)
+            return nothing
+        else
+            return push!(b, m)
+        end
     else
-        enqueue!(q, m.name)
-        println(q)
+        return push!(a, m)
     end
+end
+stack = pathTo("root", "humn")
+
+rev = Dict(
+    Base.:+ => ((b, c) -> c-b, (a, c) -> c-a),
+    Base.:÷ => ((b, c) -> b*c, (a, c) -> a÷c),
+    Base.:- => ((b, c) -> c+b, (a, c) -> a-c),
+    Base.:* => ((b, c) -> c÷b, (a, c) -> c÷a)
+)
+
+
+function findVal(m, val)
+    m.name == "humn" && return val
+    next = pop!(stack)
+    a = monkeys[m.leftName].value
+    b = monkeys[m.rightName].value
+    c = val
+    m.leftName == next.name && return findVal(next, rev[m.op][1](b, c))
+    m.rightName == next.name && return findVal(next, rev[m.op][2](a, c))
+end
+
+root = pop!(stack)
+next = pop!(stack)
+if root.leftName == next.name
+    findVal(next, monkeys[root.rightName].value)
 end
