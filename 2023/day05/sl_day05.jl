@@ -20,7 +20,8 @@ function map(v::Vector{Map}, i)
     return i
 end
 
-function map(v::Vector{Vector{Map}}, i)
+VVM = Vector{Vector{Map}}
+function map(v::VVM, i)
     for vm in v
         i = map(vm, i)
     end
@@ -41,11 +42,11 @@ function parseBlock(f)
     return v
 end
 
-maps, seeds = open("input.txt") do f
+maps, seeds = open("test.txt") do f
     tmp = split(readline(f), ":")[2]
     seeds = parse.(Int, split(tmp))
 
-    v = Vector{Vector{Map}}()
+    v = VVM()
     while !eof(f)
         push!(v, parseBlock(f))
     end
@@ -54,3 +55,18 @@ end
 
 
 min([map(maps, s) for s in seeds]...)
+
+## Part 2
+
+locations = []
+
+for i=1:2:length(seeds)
+    base = seeds[i]
+    r = seeds[i+1]
+
+    for s in base:(base + r - 1)
+        push!(locations, map(maps, s))
+    end
+end
+
+#ouch!
