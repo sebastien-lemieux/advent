@@ -39,3 +39,35 @@ for (i, p) in enumerate(sort(hands))
     theSum += i * p.bind
 end
 theSum
+
+## part 2
+
+value(c) = findfirst(==(c), "J23456789TQKA")
+const joker = value('J')
+const ace = value('A')
+
+function handTypeWithJ(h)
+    function ht2(prefix, phand)
+        isempty(phand) && return [prefix] # done
+        car = phand[1]
+        cdr = phand[2:end]
+        car == 1 && return vcat([ht2(vcat(prefix, [i]), cdr) for i in (joker+1):ace]...) # expand joker
+        return ht2(vcat(prefix, car), cdr) # just go on
+    end
+    
+    hs = ht2(Int[], h)
+    return max(handType.(hs)...)
+end
+
+function Base.isless(a::Play, b::Play)
+    at = handTypeWithJ(a.hand)
+    bt = handTypeWithJ(b.hand)
+    return at < bt || (at == bt && a.hand < b.hand)
+end
+
+theSum = 0
+for (i, p) in enumerate(sort(hands))
+    theSum += i * p.bind
+end
+theSum
+

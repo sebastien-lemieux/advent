@@ -5,12 +5,12 @@ df = open("input.txt") do f
     DataFrame(times=read(), dist=read())
 end
 
-function quadRoots(T, D)
+function nbPoss(T, D)
     compute_root(sign) = (-T + sign * sqrt(T^2 - 4D)) / -2
     return floor(Int, compute_root(-1)) - ceil(Int, compute_root(1)) + 1
 end
 
-quadRoots.(df.times, df.dist) |> prod
+nbPoss.(df.times, df.dist) |> prod
 
 
 ## part 2
@@ -20,4 +20,4 @@ df = open("input.txt") do f
     DataFrame(times=read(), dist=read())
 end
 
-quadRoots.(df.times, df.dist)
+nbPoss.(df.times, df.dist)
