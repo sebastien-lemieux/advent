@@ -39,6 +39,7 @@ macro memoize(mem_symbol, def)
     end
 
     expr = memoize_aux(def)
+    println(expr) ## Just to verify...
     return eval(expr)
 end
 
