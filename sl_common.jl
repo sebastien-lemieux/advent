@@ -22,6 +22,29 @@ end
 
 readFile(fn::String, resType = Array{Any,1}) = readFile(identity, fn, resType)
 
+function readGrid(transf, f::IOStream)
+    str = Vector{Char}[]
+    while (line = readline(f)) != ""
+        push!(str, collect(line))
+        eof(f) && break
+    end
+    return transf.(reduce(hcat, str)) |> permutedims
+end
+
+readGrid(transf, filename::String) = open(f -> readGrid(transf, f), filename)
+
+function readGrids(transf, filename)
+    open(filename) do f
+        res = nothing
+        while !eof(f)
+            tmp = readGrid(transf, f)
+            res === nothing && (res = typeof(tmp)[])
+            push!(res, tmp)
+        end
+        return res
+    end
+end
+
 struct StrIndex
     str2id::Dict{String, Int32}
     id2str::Vector{String}
