@@ -6,14 +6,18 @@ Base.parse(::Type{UnitRange}, s::AbstractString) = UnitRange(parse.(Int, split(s
 
 ## Position and directions ------------
 
-Pos = CartesianIndex{2}
-Base.parse(::Type{CartesianIndex}, s::AbstractString) = CartesianIndex(parse.(Int, split(s, ","))...)
-Base.sign(p::Pos) = Pos(sign.(Tuple(p)))
-
+const Pos = CartesianIndex{2}
 const up = Pos(-1, 0)
 const down = Pos(1, 0)
 const left = Pos(0, -1)
 const right = Pos(0, 1)
+left_turn(p::Pos) = Pos(-p[2], p[1])
+right_turn(p::Pos) = Pos(p[2], -p[1])
+
+Base.parse(::Type{CartesianIndex}, s::AbstractString) = CartesianIndex(parse.(Int, split(s, ","))...)
+Base.sign(p::Pos) = Pos(sign.(Tuple(p)))
+
+iswithin(p::Pos, size) = (1 ≤ p[1] ≤ size[1]) && (1 ≤ p[2] ≤ size[2])
 
 ## Line parsing -----------------------
 
@@ -54,7 +58,8 @@ function readGrids(transf, filename)
     end
 end
 
-function Base.show(io::IOContext, ::MIME"text/plain", mat::Matrix{Char})
+function Base.show(io::IOContext, ::MIME"text/plain", mat::Matrix{T}) where T
+    println(io, "Matrix of $T, $(size(mat))")
     for i in 1:size(mat, 1)
         println(io, mat[i,:] |> join)
     end
