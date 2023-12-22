@@ -36,22 +36,39 @@ function modify!(g, nrj, b)
     return move.(res)
 end
 
-nrj = falses(size(m));
+function energize(g, b)
+    nrj = falses(size(g));
 
-vb = [Beam(Pos(1, 1), right)];
-done = Set{Beam}();
+    vb = [b];
+    done = Set{Beam}();
 
-while !isempty(vb)
-    b = pop!(vb)
-    res = modify!(m, nrj, b)
-    # println("res = $res")
-    for bi in res
-        if bi ∉ done
-            push!(vb, bi)
-            push!(done, bi)
+    while !isempty(vb)
+        b = pop!(vb)
+        res = modify!(g, nrj, b)
+        # println("res = $res")
+        for bi in res
+            if bi ∉ done
+                push!(vb, bi)
+                push!(done, bi)
+            end
         end
     end
+
+    sum(nrj)
 end
 
-sum(nrj)
+energize(m, Beam(Pos(1, 1), right))
 
+## Part 2
+
+function testAll(g)
+    nrow, ncol = size(g)
+    return [
+        max([energize(g, Beam(Pos(1, i), down)) for i=1:ncol]...),
+        max([energize(g, Beam(Pos(nrow, i), up)) for i=1:ncol]...),
+        max([energize(g, Beam(Pos(i, 1), right)) for i=1:nrow]...),
+        max([energize(g, Beam(Pos(i, ncol), left)) for i=1:nrow]...)
+    ]
+end
+
+max(testAll(m)...)
