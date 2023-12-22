@@ -1,14 +1,21 @@
 
-## Common functions...
+## Misc -------------------------------
 
-#between(x, low, high) = x ≥ low && x ≤ high
-#int(str) = parse(Int, str)
 incr(d, x) = d[x] = get(d, x, 0) + 1
 Base.parse(::Type{UnitRange}, s::AbstractString) = UnitRange(parse.(Int, split(s, "-"))...)
+
+## Position and directions ------------
 
 Pos = CartesianIndex{2}
 Base.parse(::Type{CartesianIndex}, s::AbstractString) = CartesianIndex(parse.(Int, split(s, ","))...)
 Base.sign(p::Pos) = Pos(sign.(Tuple(p)))
+
+const up = Pos(-1, 0)
+const down = Pos(1, 0)
+const left = Pos(0, -1)
+const right = Pos(0, 1)
+
+## Line parsing -----------------------
 
 function readFile(transf, fn::String, resType = Array{Any,1})
     allRes = resType()
@@ -21,6 +28,8 @@ function readFile(transf, fn::String, resType = Array{Any,1})
 end
 
 readFile(fn::String, resType = Array{Any,1}) = readFile(identity, fn, resType)
+
+## Grids ------------------------------
 
 function readGrid(transf, f::IOStream)
     str = Vector{Char}[]
@@ -44,6 +53,14 @@ function readGrids(transf, filename)
         return res
     end
 end
+
+function Base.show(io::IOContext, ::MIME"text/plain", mat::Matrix{Char})
+    for i in 1:size(mat, 1)
+        println(io, mat[i,:] |> join)
+    end
+end
+
+## String index -----------------------
 
 struct StrIndex
     str2id::Dict{String, Int32}
