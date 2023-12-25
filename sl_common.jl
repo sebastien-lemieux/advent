@@ -7,10 +7,14 @@ Base.parse(::Type{UnitRange}, s::AbstractString) = UnitRange(parse.(Int, split(s
 ## Position and directions ------------
 
 const Pos = CartesianIndex{2}
+const Dir = Pos
 const up = Pos(-1, 0)
 const down = Pos(1, 0)
 const left = Pos(0, -1)
 const right = Pos(0, 1)
+const dirDict = Dict{AbstractString, Dir}("U" => up, "D" => down, "L" => left, "R" => right)
+Base.parse(::Type{Dir}, str::AbstractString) = dirDict[str]
+Base.:/(p::Pos, i::Int) = Pos(p[1]÷i, p[2]÷i)
 left_turn(p::Pos) = Pos(-p[2], p[1])
 right_turn(p::Pos) = Pos(p[2], -p[1])
 
