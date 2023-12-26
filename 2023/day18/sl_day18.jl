@@ -1,60 +1,63 @@
 include("../../sl_common.jl")
 
 struct Inst
+    start::Pos
     dir::Dir
     dist::Int
     color::String
 end
+Inst(dir, dist, color) = Inst(Pos(0, 0), dir, dist, color)
 
-function Base.parse(::Type{Inst}, str::AbstractString)
+function Base.parse(::Type{Inst}, str::T) where T<:AbstractString
     m = match(r"(.) (\d+) \(#(......)\)", str)
     Inst(parse(Dir, m[1]), parse(Int, m[2]), m[3])
 end
 
-# m = parse(Inst, "R 6 (#4d17d2)")
+m = parse(Inst, "R 6 (#4d17d2)")
 
-inst = readFile(line -> parse(Inst, line), "test.txt", Vector{Inst})
+inst = readFile(line -> parse(Inst, line), "input.txt", Vector{Inst})
 
 function dig(cur, trench, inst::Inst)
-    inst.dist == 0 && return cur, trench
-    new_pos = cur + inst.dir
-    push!(trench, new_pos)
-    return dig(new_pos, trench, Inst(inst.dir, inst.dist - 1, inst.color))
+    println(typeof(cur))
+    push!(trench, Inst(cur, inst.dir, inst.dist, inst.color))
+    return cur + inst.dist * inst.dir, trench
 end
 
-function dig(cur, trench, v::Vector{Inst})
-    length(v) == 0 && return cur, trench
-    new_cur, new_trench = dig(cur, trench, v[1])
-    return dig(new_cur, new_trench, v[2:end])
+function dig(cur, v::Vector{Inst})
+    trench = Vector{Inst}()
+    cur = Pos(0, 0)
+    for inst in v
+        cur, trench = dig(cur, trench, inst)
+    end
+    return cur, trench
 end
 
-cur = Pos(0, 0)
-new_cur, trench = dig(cur, Set{Pos}(), inst)
+new_cur, trench = dig(Pos(0, 0), inst)
 
 using StatsBase
 using DataStructures
 
-theMean = mean(trench)
+theMean = mean([i.start + (i.dist÷2) * i.dir for i in trench])
 
-function fill(p::Pos, trench)
-    q = Queue{Pos}(); enqueue!(q, p)
-    inside = Set{Pos}()
-    while !isempty(q)
-        p = dequeue!(q)
-        p ∈ trench && continue
-        if p ∉ inside
-            push!(inside, p)
-            for d in values(dirDict)
-                enqueue!(q, p+d)
-            end
-        end
-    end
-    return inside
-end
+# function fill(p::Pos, trench)
+#     q = Queue{Pos}(); enqueue!(q, p)
+#     inside = Set{Pos}()
+#     while !isempty(q)
+#         p = dequeue!(q)
+#         p ∈ trench && continue
+#         if p ∉ inside
+#             push!(inside, p)
+#             for d in values(dirDict)
+#                 enqueue!(q, p+d)
+#             end
+#         end
+#     end
+#     return inside
+# end
 
-i = fill(theMean, trench)
+# i = fill(theMean, trench)
 
-length(i) + length(trench)
+# length(i) + length(trench)
 
 ## Part 2
 
@@ -70,9 +73,40 @@ end
 
 inst2 = [extract(i) for i in inst]
 
-cur = Pos(0, 0)
-new_cur, trench = dig(cur, Set{Pos}(), inst2)
-theMean = mean(trench)
+new_cur, trench = dig(Pos(0, 0), inst2)
 
+# [i.dist * i.start[2] * i.dir[1] for i in trench] |> sum
 
-fill(theMean, inst2)
+function computeArea(trench)
+    l = length(trench)
+    area = 0
+    for j = 1:l
+        i = (j+l-2)%l+1 # before
+        k = (j)%l+1     # after
+        i_dir = trench[i].dir
+        j_dir = trench[j].dir
+        k_dir = trench[k].dir
+        println("$i $j $k $(trench[j].dir)")
+        mod = 0
+        d = 0
+        new_d = 0
+        if j_dir == down
+            d = trench[j].dist
+            i_dir == right && k_dir == left && (d += 1)
+            i_dir == left && k_dir == right && (d -= 1)
+            mod = d * trench[j].start[2]
+            new_d = d - trench[j].dist
+        elseif j_dir == up
+            d = trench[j].dist
+            i_dir == right && k_dir == left && (d -= 1)
+            i_dir == left && k_dir == right && (d += 1)
+            mod = -d * (trench[j].start[2] - 1)
+            new_d = d - trench[j].dist
+        end
+        println("$j -> $mod ($area) : $new_d")
+        area += mod
+    end
+    return area
+end
+
+computeArea(trench)
