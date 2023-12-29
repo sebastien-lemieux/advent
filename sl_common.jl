@@ -25,7 +25,7 @@ iswithin(p::Pos, size) = (1 ≤ p[1] ≤ size[1]) && (1 ≤ p[2] ≤ size[2])
 
 ## Line parsing -----------------------
 
-function readFile(transf, fn::String, resType = Array{Any,1})
+function readFile(transf::Function, fn::String, resType = Array{Any,1})
     allRes = resType()
     open(fn) do f
         while !eof(f)
@@ -36,6 +36,29 @@ function readFile(transf, fn::String, resType = Array{Any,1})
 end
 
 readFile(fn::String, resType = Array{Any,1}) = readFile(identity, fn, resType)
+
+function readFile(v_transf::Vector{T}, v_type::Vector{Type}, fn::String) where T <: Function
+    allRes = Any[]
+    println("v_type: $v_type")
+    open(fn) do f
+        i = 1
+        res = v_type[i][]
+        while !eof(f)
+            line = readline(f)
+            transf = v_transf[i]
+            println("transf: $transf")
+            if line == ""
+                i += 1
+                push!(allRes, res)
+                res = v_type[i][]
+            else
+                push!(res, transf(line))
+            end
+        end
+        push!(allRes, res)
+    end
+    return allRes
+end
 
 ## Grids ------------------------------
 
