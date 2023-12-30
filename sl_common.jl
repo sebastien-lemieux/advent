@@ -37,12 +37,11 @@ end
 
 readFile(fn::String, resType = Array{Any,1}) = readFile(identity, fn, resType)
 
-function readFile(v_transf::Vector{T}, v_type::Vector{Type}, fn::String) where T <: Function
+function readFile(v_transf::Vector{T}, fn::String) where T <: Function
     allRes = Any[]
-    println("v_type: $v_type")
     open(fn) do f
         i = 1
-        res = v_type[i][]
+        res = Any[]
         while !eof(f)
             line = readline(f)
             transf = v_transf[i]
@@ -50,7 +49,7 @@ function readFile(v_transf::Vector{T}, v_type::Vector{Type}, fn::String) where T
             if line == ""
                 i += 1
                 push!(allRes, res)
-                res = v_type[i][]
+                res = Any[]
             else
                 push!(res, transf(line))
             end
