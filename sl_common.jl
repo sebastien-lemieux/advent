@@ -45,7 +45,6 @@ function readFile(v_transf::Vector{T}, fn::String) where T <: Function
         while !eof(f)
             line = readline(f)
             transf = v_transf[i]
-            println("transf: $transf")
             if line == ""
                 i += 1
                 push!(allRes, res)

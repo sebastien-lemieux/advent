@@ -65,7 +65,7 @@ sum(sum.(parts[accepted]))
 
 ## Part 2
 
-import Base: ∩, <
+import Base: ∩, <, length
 
 struct PartRange{T}
     x::UnitRange{T}
