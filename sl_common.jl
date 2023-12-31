@@ -1,7 +1,7 @@
 
 ## Misc -------------------------------
 
-incr(d, x) = d[x] = get(d, x, 0) + 1
+incr(d, x, c=1) = (d[x] = get(d, x, 0) + c)
 Base.parse(::Type{UnitRange}, s::AbstractString) = UnitRange(parse.(Int, split(s, "-"))...)
 
 ## Position and directions ------------
