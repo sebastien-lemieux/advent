@@ -70,6 +70,7 @@ function readGrid(transf, f::IOStream)
 end
 
 readGrid(transf, filename::String) = open(f -> readGrid(transf, f), filename)
+readGrid(filename::String) = readGrid(identity, filename)
 
 function readGrids(transf, filename)
     open(filename) do f
@@ -82,6 +83,8 @@ function readGrids(transf, filename)
         return res
     end
 end
+
+inBounds(grid, p) = all([1 ≤ p[i] ≤ theMax for (i, theMax) in enumerate(size(farm))])
 
 function Base.show(io::IOContext, ::MIME"text/plain", mat::Matrix{T}) where T
     println(io, "Matrix of $T, $(size(mat))")
