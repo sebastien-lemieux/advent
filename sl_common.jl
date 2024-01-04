@@ -85,13 +85,18 @@ function readGrids(transf, filename)
 end
 
 inBounds(grid, p) = all([1 ≤ p[i] ≤ theMax for (i, theMax) in enumerate(size(farm))])
+warp(i::Int, width::Int)::Int = ((i - 1) % width + width) % width + 1
+warp(i::Pos, width::Int)::Pos = Pos(warp(i[1], width), warp(i[2], width))
 
-function Base.show(io::IOContext, ::MIME"text/plain", mat::Matrix{T}) where T
-    println(io, "Matrix of $T, $(size(mat))")
+Base.show(io::IOContext, ::MIME"text/plain", mat::Matrix{Char}) = Base.show(io, mat)
+
+function Base.show(io::IO, mat::Matrix{Char})
+    println(io, "Character grid, $(size(mat))")
     for i in 1:size(mat, 1)
         println(io, mat[i,:] |> join)
     end
 end
+
 
 ## String index -----------------------
 

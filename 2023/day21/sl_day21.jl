@@ -1,96 +1,93 @@
 include("../../sl_common.jl")
 
-farm = readGrid("test.txt")
+using DataStructures
 
-function takeStep!(cur, farm, p)
-    new_p = [p+d for d in [up, down, left, right]]
-    new_p = filter(np -> (inBounds(farm, np) && farm[np] != '#'), new_p)
-    push!(cur, new_p...)
+include("../../sl_common.jl")
+using DataStructures, CairoMakie, StatsBase
+
+farm = readGrid("input.txt")
+width = size(farm)[1] # For a square matrix
+
+warp(i::Int, width::Int)::Int = ((i - 1) % width + width) % width + 1
+warp(i::Pos, width::Int)::Pos = Pos(warp(i[1], width), warp(i[2], width))
+
+function showGrid(farm, pos)
+    g = copy(farm)
+    g[pos |> collect] .= 'O'
+    println(g)
 end
 
-cur = Set(filter(p -> farm[p] == 'S', CartesianIndices(farm)))
+function computeCounts(farm::Matrix{Char}, n::Int)
+    width = size(farm)[1] # For a square matrix
+    active = Set{Pos}([Pos((width+1)÷2, (width+1)÷2)])
+    last_active = empty(active)
+    theCounts = [1] # there's any implicit 1 at theCounts[0]
+    theF = Int[]
 
-for i=1:64
-    new_cur = Set{Pos}()
-    for p in cur
-        takeStep!(new_cur, farm, p)
-    end
-    # println("$i ($(length(new_cur))): $new_cur")
-    cur = new_cur
-end
-
-length(cur)
-
-## Part 2
-
-curc = Dict{Pos, Int}()
-
-function bringInBounds(grid, p::Pos)::Pos
-    function _tmp(i)
-        x = p[i] - 1 # zero-based
-        theMax = size(grid)[i]
-        ((x < 0) ? ceil(Int, -x / theMax) * theMax + x : x % theMax) + 1
-    end
-    Pos([_tmp(i) for i=1:length(p)]...)
-end
-# bringInBounds(farm, CartesianIndex(-10000000, 1))
-
-
-function takeStep!(curc, farm, p, prev_count)
-    # new_p = [bringInBounds(farm, p+d) for d in [up, down, left, right]]
-    new_p = [p+d for d in [up, down, left, right]]
-
-    new_p = filter(np -> farm[np] != '#', new_p)
-    for np in new_p
-        incr(curc, np, prev_count)
-    end
-end
-
-# p = CartesianIndex(0, 6)
-
-curc = Dict{Pos, Int}()
-curc[filter(p -> farm[p] == 'S', CartesianIndices(farm))...] = 1
-prev = 1
-last_seen = empty(curc)
-last_count = empty(curc)
-loop = Dict{Pos, NTuple{2, Int}}()
-theCount = empty(loop)
-nbGarden = count(∈(['.', 'S']), farm)
-
-for i=1:50
-    new_curc = empty(curc)
-    # borders = empty(curc)
-    for (p, c) in curc
-        new_p = [p+d for d in [up, down, left, right]]
-        for np in new_p
-            farm[bringInBounds(farm, np)] == '#' && continue
-            new_curc[np] = 1
-            !inBounds(farm, np) && continue
-            if haskey(last_seen, np)
-                if !haskey(loop, np)
-                    loop[np] = (last_seen[np], i)
-                    theCount[np] = (last_count[np], length(curc))
-                end
-            else
-                last_seen[np] = i
-                last_count[np] = length(curc)
+    for i=1:n
+        new_active = empty(active)
+        for p in active
+            for d in [up, down, left, right]
+                farm[warp(p+d, width)] == '#' && continue
+                p+d ∈ last_active && continue
+                push!(new_active, p+d)
             end
         end
+
+        push!(theCounts, (i>1) ? (theCounts[i-1] + length(new_active)) : length(new_active))
+        # println("$i: $(last(theCounts)) $(length(new_active))")
+        # showGrid(farm, new_active)
+        last_active = active
+        active = new_active
+
+        f = 0
+        if length(theCounts) > 4width + 1
+            a = theCounts[end - 4width]
+            b = theCounts[end - 2width]
+            c = theCounts[end]
+            d = b-a
+            e = c-b
+            f = e-d
+            push!(theF, f)
+        end
+        println("$i: $(last(theCounts)) $(length(new_active)) $f")
+
     end
-    # centered = empty(new_curc)
-    # for (p, c) in new_curc
-    #     centered[bringInBounds(farm, p)] = get(centered, p, 0) + c
-    # end
-
-    if length(loop) == nbGarden
-        periods = [l[2] - l[1] for l in values(loop)]
-        theLcm = lcm(periods...)
-
-    else
-        pred = 0
-    end
-
-    println("$i: $(length(new_curc)) $(length(loop)) $(length(new_curc) - prev)")
-    curc = new_curc
-    prev = length(curc)
+    return theCounts, theF
 end
+
+@time theCounts, f = computeCounts(farm, 12width)
+
+x = 2:length(theCounts)
+y = theCounts[x] - theCounts[x .- 1]
+lines(x, y)
+
+obj = 26501365 + 1
+# obj = 5000 + 1
+
+base = length(theCounts)
+r = 2width - ((obj - base) % 2width)
+base -= r
+nb = (obj - base) ÷ 2width
+
+a = theCounts[base - 4width]
+b = theCounts[base - 2width]
+c = theCounts[base]
+# d = b-a
+# e = c-b
+# f = e-d # This is constant after a while...
+
+# new_e = e + f
+# new_c = 2c - b + f
+# new_c = 2c - b + (c-b)-(b-a) = 3c - 3b + a
+
+# Recurrence: fa(n) = 3 fa(n-1) - 3 fa(n-2) + fa(n-3)
+# Characteristic eq: r^3 - 3r^2 + 3r - 1 = 0
+# Roots: r - 1 = 0
+# Solution: fa(n) = (α10 + α11 n + α12 n^2) * r^n = α10 + α11 n + α12 n^2
+# a = [1 0 0], b = [1 1 1], c = [1 2 4]
+α10, α11, α12 = Matrix{Int}([1 0 0; 1 1 1; 1 2 4] \ [a; b; c;;])
+
+fa(n) = α10 + α11 * n + α12 * n^2
+
+fa(2+nb)
