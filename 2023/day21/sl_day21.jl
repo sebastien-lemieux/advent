@@ -1,8 +1,4 @@
 include("../../sl_common.jl")
-
-using DataStructures
-
-include("../../sl_common.jl")
 using DataStructures, CairoMakie, StatsBase
 
 farm = readGrid("input.txt")
