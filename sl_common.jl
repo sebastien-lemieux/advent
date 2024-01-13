@@ -25,8 +25,9 @@ iswithin(p::Pos, size) = (1 ≤ p[1] ≤ size[1]) && (1 ≤ p[2] ≤ size[2])
 
 ## Line parsing -----------------------
 
-function readFile(transf::Function, fn::String, resType = Array{Any,1})
-    allRes = resType()
+function readFile(transf::Function, fn::String)
+    rtype = Base.return_types(transf, (String,))[1]
+    allRes = rtype[]
     open(fn) do f
         while !eof(f)
             push!(allRes, transf(readline(f)))
