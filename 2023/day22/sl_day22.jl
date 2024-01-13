@@ -1,3 +1,5 @@
+using DataStructures
+
 include("../../sl_common.jl")
 
 struct PileP
@@ -67,3 +69,27 @@ nsup = sum(ontop, dims=2) # number of supports below each brick
 tmp = [sum(==(1), ontop[:,i] .* nsup) for i=1:l] # supporting a single support brick
 sum(==(0), tmp)
 
+## part 2
+
+function check(i, ontop) # breadth first traversal
+    q = Deque{Int}()
+    push!(q, i)
+    nsup = vec(sum(ontop, dims=2)) # number of supports below each brick
+    falling = 0
+
+    while !isempty(q)
+        cur = popfirst!(q)
+        # println("dealing with $cur")
+        above = ontop[:,cur]
+        nsup = nsup - above
+        next = above .&& (nsup .== 0)
+        for j in findall(next)
+            push!(q, j)
+            falling += 1
+            # println("  falling $j")
+        end
+    end
+    return falling
+end
+
+[check(i, ontop) for i=1:l] |> sum
