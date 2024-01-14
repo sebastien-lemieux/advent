@@ -12,6 +12,7 @@ const up = Pos(-1, 0)
 const down = Pos(1, 0)
 const left = Pos(0, -1)
 const right = Pos(0, 1)
+const dirs = [up, down, left, right]
 const dirDict = Dict{AbstractString, Dir}("U" => up, "D" => down, "L" => left, "R" => right)
 Base.parse(::Type{Dir}, str::AbstractString) = dirDict[str]
 Base.:/(p::Pos, i::Int) = Pos(p[1]÷i, p[2]÷i)
