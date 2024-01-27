@@ -86,7 +86,7 @@ function readGrids(transf, filename)
     end
 end
 
-inBounds(grid, p) = all([1 ≤ p[i] ≤ theMax for (i, theMax) in enumerate(size(farm))])
+inBounds(grid, p) = all([1 ≤ p[i] ≤ theMax for (i, theMax) in enumerate(size(grid))])
 warp(i::Int, width::Int)::Int = ((i - 1) % width + width) % width + 1
 warp(i::Pos, width::Int)::Pos = Pos(warp(i[1], width), warp(i[2], width))
 
